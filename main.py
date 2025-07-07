@@ -1,8 +1,8 @@
 #Importação de módulos
 import time
 from colorama import init, Fore, Style
+from datetime import datetime
 init(autoreset=True)
-
 
 #Declaração de funções
 def menu_e_escolha():
@@ -31,8 +31,12 @@ def menu_e_escolha():
                         dados = arquivo.readlines()
                         print("Informe abaixo os dados do paciente.")
                         arquivo.write(str((len(dados)+1)) + ";" + input("Nome do paciente: ") + ";" + input("Espécie: ") + ";" + input("Raça: ") + ";")
-                        arquivo.write(input("Data de nascimento (dd/mm/aaaa): ") + ";")
-                        arquivo.write(input("Idade: ") + ";" + input("Sexo: ") + ";" + input("Castrado ou fértil: ") + ";" + input("Vacinas [Sim ou não]: ") + ";" + input("Informe a baia o animal será internado: ") + ";" + input("Nome do tutor: ") + ";" + input("Telefone: ") + ";" + input("Endereço: ") + ";")
+                        arquivo.write(input("Informe a data de nascimento no formato dd/mm/aaaa: ") + ";")
+                        arquivo.seek(0) 
+                        dados = arquivo.readlines()
+                        linha = dados[len(dados)-1].strip().split(";")
+                        arquivo.write(calcular_idade(linha[4]) + ";")
+                        arquivo.write(input("Sexo: ") + ";" + input("Castrado ou fértil: ") + ";" + input("Vacinas [Sim ou não]: ") + ";" + input("Informe a baia o animal será internado: ") + ";" + input("Nome do tutor: ") + ";" + input("Telefone: ") + ";" + input("Endereço: ") + ";")
                         arquivo.write(input("Informe a data de entrada do paciente (dd/mm/aaaa): ") + ";" + "0" + "\n")
                         time.sleep(1)
                         print(f"\n{Fore.GREEN}Dados gravados com sucesso.{Style.RESET_ALL}")
@@ -44,7 +48,6 @@ def menu_e_escolha():
 
         elif escolha == 2: #Listagem dos paciente
             listar_pacientes()
-            time.sleep(2)
     
         elif escolha == 3:  #Listagem para escolha do paciente que será realizado o procedimento
             if not listar_pacientes():
@@ -171,11 +174,7 @@ def listar_pacientes():
                     return True
         except FileNotFoundError:
             with open("cadastro.csv", "w", encoding="utf-8")as arquivo:
-                time.sleep(1)
-                
-            
-    
-            
+                time.sleep(1)          
 def inserir_procedimento(escolha_paciente, valor_procedimento):
     with open("cadastro.csv", "r", encoding="utf-8")as arquivo: 
         lista = arquivo.readlines()
@@ -187,10 +186,20 @@ def inserir_procedimento(escolha_paciente, valor_procedimento):
     with open("cadastro.csv", "w", encoding="utf-8") as arquivo:
         arquivo.writelines(lista)
     print(f"\nProcedimento de R$ {valor_procedimento:.2f} adicionado ao paciente de índice {escolha_paciente+1}.")
+def calcular_idade(data_nascimento_str):
+    data_nascimento = datetime.strptime(data_nascimento_str, "%d/%m/%Y")
+    hoje = datetime.now()
+
+    idade = hoje.year - data_nascimento.year
+
+    # Ajuste se ainda não fez aniversário esse ano
+    if (hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day):
+        idade -= 1
+
+    return str(idade)
 
 #Inicialização
 menu_e_escolha()
-
 
 #Finalização do programa
 print(f"{Fore.RED}Encerrando{Style.RESET_ALL}", end='')
